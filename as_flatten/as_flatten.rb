@@ -52,7 +52,7 @@ module AS_Flatten
     # Make a collection of all faces in the selection
     faces = []
     sel.each {|e|
-      faces.push(e) if e.typename == "Face"
+      faces.push(e) if e.is_a? Sketchup::Face
     }
     
     # Base everything on the first face
@@ -102,7 +102,7 @@ module AS_Flatten
   
     contains = false
     Sketchup.active_model.selection.each{|e|
-      contains = true if e.typename == "Face"
+      contains = true if e.is_a? Sketchup::Face
     }
     return contains
 
