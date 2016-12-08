@@ -1,6 +1,6 @@
 =begin
 
-Copyright 2014-2015, Alexander C. Schreyer
+Copyright 2014-2016, Alexander C. Schreyer
 All rights reserved
 
 THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -15,9 +15,9 @@ Website:        http://www.alexschreyer.net/projects/flatten-faces-plugin/
 
 Name :          Unwrap and Flatten Faces
 
-Version:        2.1
+Version:        2.2
 
-Date :          2/22/2015
+Date :          12/8/2016
 
 Description :   Allows the user to do two things:
                 1)  Lay an arbitrarily-oriented face or collection of coplanar faces flat
@@ -39,10 +39,15 @@ History:        1.0 (2/12/2014):
                 - Added Help submenu item
                 - Code cleanup
                 - Fixed SU 8 bug with array.count
+                2.2 (12/8/2016):
+                - Fixed loader code
+                - Code cleanup
+                - Fixed problem with SU 2017
+                - New settings: show/hide dialog, set iterations
 
 Issues:         - The unwrapping algorithm doesn't always work automatically. It basically starts at a
                   random face and tries to line up all faces in a logical pattern. If this doesn't succeed,
-                  then it iterates 100 times to get this right. If it still doesn't work, re-try with fewer
+                  then it iterates 1000 times to get this right. If it still doesn't work, re-try with fewer
                   faces in your selection. Each run is random, so results can vary between tries.
 
 TODO List:
@@ -50,22 +55,40 @@ TODO List:
 =end
 
 
-# =========================================
+# ========================
 
 
-require 'sketchup'
-require 'extensions'
+require 'sketchup.rb'
+require 'extensions.rb'
 
 
-# =========================================
+# ========================
 
 
-as_flatten = SketchupExtension.new "Unwrap and Flatten Faces", "as_flatten/as_flatten.rb"
-as_flatten.copyright= 'Copyright 2014-2015 Alexander C. Schreyer'
-as_flatten.creator= 'Alexander C. Schreyer, www.alexschreyer.net'
-as_flatten.version = '2.1'
-as_flatten.description = "Allows the user to automatically unwrap several faces and lay them flat on the ground. This helps in producing cutouts, as CNC-prep, for texturing etc. Can also be used in combination with a manual unfold tool to lay flat shapes on the ground. Usage: Select one or more ungrouped faces and right-click on them to get the 'Flatten faces' menu."
-Sketchup.register_extension as_flatten, true
+module AS_Extensions
+
+  module AS_Flatten
+  
+    @extversion           = "2.2"
+    @exttitle             = "Unwrap and Flatten Faces"
+    @extname              = "as_flatten"
+    
+    @extdir = File.dirname(__FILE__)
+    @extdir.force_encoding('UTF-8') if @extdir.respond_to?(:force_encoding)
+    
+    loader = File.join( @extdir , @extname , "as_flatten.rb" )
+   
+    extension             = SketchupExtension.new( @exttitle , loader )
+    extension.copyright   = "Copyright 2014-#{Time.now.year} Alexander C. Schreyer"
+    extension.creator     = "Alexander C. Schreyer, www.alexschreyer.net"
+    extension.version     = @extversion
+    extension.description = "Allows the user to automatically unwrap several selected faces and lay them flat on the ground. This helps in producing cutouts, as CNC-prep, for texturing etc. Can also be used in combination with a manual unfold tool to lay flat shapes on the ground. Usage: Select one or more ungrouped faces and right-click on them to get the 'Flatten faces' menu."
+    
+    Sketchup.register_extension( extension , true )
+         
+  end  # module AS_Flatten
+  
+end  # module AS_Extensions
 
 
-# =========================================
+# ========================
