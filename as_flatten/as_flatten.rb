@@ -15,13 +15,14 @@ module AS_Extensions
   module AS_Flatten
   
   
-  # =========================================
-  
-  
+# =========================================
+
+ 
     # Get settings
     @conf = Sketchup.read_default @extname, "confirmation", "show"
     @prompt = Sketchup.read_default @extname, "prompts", "hide"
     @iter = Sketchup.read_default @extname, "iterations", "1000"
+    @axis = Sketchup.read_default @extname, "axis", "Z_AXIS"
 
 
   # =========================================
@@ -32,14 +33,14 @@ module AS_Extensions
 
       # Get first face in group
       fa = gr.entities.grep( Sketchup::Face )[0]
+      norm = fa.normal.transform!( gr.transformation )
       
       UI.messagebox("Now rotating\nContinue?") if @prompt == "show"
             
       # Then rotate the group - if necessary - so that it lays flat
-      up = Geom::Vector3d.new [0,0,1]
-      if !fa.normal.parallel?( up )
-        rot = fa.normal.angle_between( up )
-        cr = fa.normal.cross( up )
+      if !norm.parallel?( Object.const_get(@axis) )
+        rot = norm.angle_between( Object.const_get(@axis) )
+        cr = norm.cross( Object.const_get(@axis) )
         t1 = Geom::Transformation.rotation( gr.bounds.center , cr , rot )
         gr.transform!( t1 )
       end
@@ -92,18 +93,22 @@ module AS_Extensions
           mod.start_operation("Flatten Faces")
 
           # Group face(s) and drop
-          group = ent.add_group( ofaces )
-          rotate_drop( group )
+          g = ent.add_group()
+          g2 = ent.add_group( ofaces )
+          g3 = g.entities.add_instance( g2.definition , g.transformation.invert!*g2.transformation )
+          g2.explode
+          g3.explode  
+          rotate_drop( g )
 
           # Allow for undo
           mod.commit_operation
 
-        else  # Try to unwrap faces first, then lay them flat
+        else  # Unwrap faces first, then lay them flat
 
           # Mention what we will do
           UI.messagebox("Non-coplanar faces selected. Will try to unwrap first and then flatten them. This doesn't always work automatically. Re-try with fewer faces in your selection if you run into problems. Each run is random, so results can vary between tries.") if @conf == "show"
 
-          mod.start_operation("Unwrap and Flatten")
+          mod.start_operation("Unwrap and Flatten Faces")
 
           # A few more variables for this
           faces = Array.new
@@ -201,9 +206,9 @@ module AS_Extensions
             endnum = g.entities.grep( Sketchup::Face ).length
             rotate_drop( g )
             
-            msg = "#{endnum} out of #{startnum} faces unwrapped. "
+            msg = "#{endnum} out of #{startnum} selected faces unwrapped. "
             msg += "Automatic unwrapping is not possible. Select fewer faces (or increase iterations in settings). " if endnum < startnum
-            msg += "Unwrapping yielded overlapping faces. Select fewer faces for a better result. " if endnum > startnum
+            msg += "Unwrapping yielded overlapping faces. Select fewer faces (unwrap in segments) for a better result. " if endnum > startnum
             msg += "\n\nExplode result and run tool again if faces are not on ground."
             UI.messagebox(msg)
 
@@ -260,14 +265,15 @@ module AS_Extensions
     
     def self.settings
     
-      prompts = ["Confirmation dialog " , "Step prompts " , "Iterations "]
-      defaults = [@conf , @prompt , @iter]
-      lists = ["show|hide" , "show|hide" , "10|50|100|500|1000|5000"]
+      prompts = ["Flatten normal to " , "Iterations " , "Confirmation dialog " , "Step prompts "]
+      defaults = [@axis , @iter , @conf , @prompt]
+      lists = ["X_AXIS|Y_AXIS|Z_AXIS" , "10|50|100|500|1000|5000|10000" , "show|hide" , "show|hide"]
       res = UI.inputbox( prompts , defaults , lists , "#{@exttitle} Settings")
       if res
-        Sketchup.write_default @extname, "confirmation", @conf = res[0]  
-        Sketchup.write_default @extname, "prompts", @prompt = res[1]
-        Sketchup.write_default @extname, "iterations", @iter = res[2].to_i
+        Sketchup.write_default @extname, "axis", @axis = res[0]
+        Sketchup.write_default @extname, "iterations", @iter = res[1].to_i
+        Sketchup.write_default @extname, "confirmation", @conf = res[2]  
+        Sketchup.write_default @extname, "prompts", @prompt = res[3]
       end
       
     end
@@ -288,7 +294,7 @@ module AS_Extensions
       # Add to the context menu
       UI.add_context_menu_handler do |menu|
         if( self.contains_face )
-          menu.add_item("Flatten Faces") { self.flatten_face }
+          menu.add_item("Flatten Selection") { self.flatten_face }
         end
       end
 

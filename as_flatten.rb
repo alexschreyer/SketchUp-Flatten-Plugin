@@ -17,7 +17,7 @@ Name :          Unwrap and Flatten Faces
 
 Version:        2.2
 
-Date :          12/8/2016
+Date :          12/9/2016
 
 Description :   Allows the user to do two things:
                 1)  Lay an arbitrarily-oriented face or collection of coplanar faces flat
@@ -39,12 +39,12 @@ History:        1.0 (2/12/2014):
                 - Added Help submenu item
                 - Code cleanup
                 - Fixed SU 8 bug with array.count
-                2.2 (12/8/2016):
+                2.2 (12/9/2016):
                 - Fixed loader code
                 - Code cleanup
                 - Fixed problem with SU 2017
-                - New settings: show/hide dialog, set iterations
-                - Better unwrapping algorithm, handles larger items
+                - New settings: show/hide dialogs, set iterations, target plane
+                - Better unwrapping algorithm, handles larger items now
                 - End statistics and feedback added
 
 Issues:         - The unwrapping algorithm doesn't always work automatically. It basically starts at a
