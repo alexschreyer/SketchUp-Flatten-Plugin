@@ -44,6 +44,8 @@ History:        1.0 (2/12/2014):
                 - Code cleanup
                 - Fixed problem with SU 2017
                 - New settings: show/hide dialog, set iterations
+                - Better unwrapping algorithm, handles larger items
+                - End statistics and feedback added
 
 Issues:         - The unwrapping algorithm doesn't always work automatically. It basically starts at a
                   random face and tries to line up all faces in a logical pattern. If this doesn't succeed,

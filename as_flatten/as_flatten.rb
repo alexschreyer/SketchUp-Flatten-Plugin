@@ -33,17 +33,18 @@ module AS_Extensions
       # Get first face in group
       fa = gr.entities.grep( Sketchup::Face )[0]
       
-      UI.messagebox("Now rotating\nContinue?") if @prompt != "hide"
-      
+      UI.messagebox("Now rotating\nContinue?") if @prompt == "show"
+            
       # Then rotate the group - if necessary - so that it lays flat
-      if !fa.normal.parallel?( [0,0,1] )
-        rot = fa.normal.angle_between( [0,0,1] )
-        cr = fa.normal.cross( [0,0,1] )
+      up = Geom::Vector3d.new [0,0,1]
+      if !fa.normal.parallel?( up )
+        rot = fa.normal.angle_between( up )
+        cr = fa.normal.cross( up )
         t1 = Geom::Transformation.rotation( gr.bounds.center , cr , rot )
         gr.transform!( t1 )
       end
       
-      UI.messagebox("Now dropping to z=0\nContinue?") if @prompt != "hide"
+      UI.messagebox("Now dropping to z=0\nContinue?") if @prompt == "show"
 
       # Then drop to z=0
       el = gr.bounds.center.z
@@ -54,8 +55,8 @@ module AS_Extensions
 
 
   # =========================================
-
-
+  
+  
     def self.flatten_face
     # Flattens (into x-y plane) all selected faces
 
@@ -68,6 +69,7 @@ module AS_Extensions
 
       # Make a collection of all faces in the selection
       ofaces = sel.grep( Sketchup::Face )
+      startnum = ofaces.length
 
       # Reminder if started from menu item and nothing selected
       if ofaces.length < 1
@@ -99,7 +101,7 @@ module AS_Extensions
         else  # Try to unwrap faces first, then lay them flat
 
           # Mention what we will do
-          UI.messagebox("Non-coplanar faces selected. Will try to unwrap first and then flatten them. This doesn't always work automatically. Re-try with fewer faces in your selection if you run into problems. Each run is random, so results can vary between tries.") if @conf != "hide"
+          UI.messagebox("Non-coplanar faces selected. Will try to unwrap first and then flatten them. This doesn't always work automatically. Re-try with fewer faces in your selection if you run into problems. Each run is random, so results can vary between tries.") if @conf == "show"
 
           mod.start_operation("Unwrap and Flatten")
 
@@ -155,11 +157,12 @@ module AS_Extensions
 
           end
 
-          # Catch problems while unwrapping
-          begin
+          # Now do the actual unwrapping
+          
+          begin # Catch problems while unwrapping
 
-            # Array for all unwrapped faces
-            done = Array.new
+            # Group for all unwrapped faces
+            g = ent.add_group
 
             # Now iterate through the faces
             (1..faces.length-1).each {|i|
@@ -172,23 +175,37 @@ module AS_Extensions
               onormal = faces[i-1].normal
               rot = tnormal.angle_between( onormal )
               cr = tnormal.cross( onormal )
-              t = Geom::Transformation.rotation( cedge[0].start , cr , -rot )
-
-              # Add the face to the done faces and flip them flat
-              done.push faces[i-1]
-              g = ent.add_group( done )
-              g.transform!( t )
-              # Workaround for SU 2017 quirk, face references go away after explode
-              done = g.explode.grep( Sketchup::Face )
+              t1 = Geom::Transformation.rotation( cedge[0].start , cr , -rot )
               
-              UI.messagebox( "Face #{i} done\nContinue?" ) if  @prompt  != "hide"
+              # Add the face to the done group             
+              g2 = ent.add_group( faces[i-1] )
+              g3 = g.entities.add_instance( g2.definition , g.transformation.invert!*g2.transformation )
+              g2.explode
+              g3.explode             
+              
+              # Then rotate complete group to next face
+              g.transform!( t1 )
+              
+              UI.messagebox( "Face #{i} done\nContinue?" ) if @prompt == "show"
 
             }
+            
+            # Add the last face to the done group             
+            g2 = ent.add_group( faces[faces.length-1] )
+            g3 = g.entities.add_instance( g2.definition , g.transformation.invert!*g2.transformation )
+            g2.explode
+            g3.explode    
+            UI.messagebox( "Face #{faces.length} done\nContinue?" ) if @prompt == "show"
 
-            # Group everything after unwrapping and drop
-            done.push faces.last            
-            group = ent.add_group( done )            
-            rotate_drop( group )
+            # Rotate after unwrapping and drop   
+            endnum = g.entities.grep( Sketchup::Face ).length
+            rotate_drop( g )
+            
+            msg = "#{endnum} out of #{startnum} faces unwrapped. "
+            msg += "Automatic unwrapping is not possible. Select fewer faces (or increase iterations in settings). " if endnum < startnum
+            msg += "Unwrapping yielded overlapping faces. Select fewer faces for a better result. " if endnum > startnum
+            msg += "\n\nExplode result and run tool again if faces are not on ground."
+            UI.messagebox(msg)
 
             Sketchup.status_text = "Unwrapping | Done"
 
@@ -243,10 +260,10 @@ module AS_Extensions
     
     def self.settings
     
-      prompts = ["Confirmation dialog","Step prompts","Iterations"]
-      defaults = [@conf,@prompt,@iter]
-      lists = ["show|hide","show|hide","10|50|100|500|1000|5000"]
-      res = UI.inputbox(prompts, defaults, lists, "#{@exttitle} Settings")
+      prompts = ["Confirmation dialog " , "Step prompts " , "Iterations "]
+      defaults = [@conf , @prompt , @iter]
+      lists = ["show|hide" , "show|hide" , "10|50|100|500|1000|5000"]
+      res = UI.inputbox( prompts , defaults , lists , "#{@exttitle} Settings")
       if res
         Sketchup.write_default @extname, "confirmation", @conf = res[0]  
         Sketchup.write_default @extname, "prompts", @prompt = res[1]
