@@ -15,7 +15,7 @@ module AS_Extensions
   module AS_Flatten
   
   
-# =========================================
+  # =========================================
 
  
     # Get settings
@@ -58,8 +58,8 @@ module AS_Extensions
   # =========================================
   
   
-    def self.flatten_face
-    # Flattens (into x-y plane) all selected faces
+    def self.flatten_faces
+    # Flattens (into x-y plane) all selected faces (without distortions!)
 
       mod = Sketchup.active_model
       ent = mod.entities
@@ -229,7 +229,58 @@ module AS_Extensions
 
       end # main routine
 
-    end # def flatten_face
+    end # def flatten_faces
+    
+    
+    # =========================================
+
+
+    def self.smash_faces
+    # Smashes (projects) the selected faces onto a plane (with distortions!)
+
+      mod = Sketchup.active_model
+      ent = mod.entities
+      sel = mod.selection
+
+      # Array to hold the faces
+      ofaces = Array.new
+
+      # Make a collection of all faces in the selection
+      ofaces = sel.grep( Sketchup::Face )    
+      
+      # Reminder if started from menu item and nothing selected
+      if ofaces.length < 1
+
+        UI.messagebox("Select at least one ungrouped face to use this tool.")
+
+      else # Get going      
+      
+        Sketchup.status_text = "Smashing | Working..."
+        
+        mod.start_operation("Smashing Faces")
+      
+        # Group for result and plane
+        g = ent.add_group
+        plane = [ ORIGIN , Object.const_get(@axis) ]
+        
+        # Now smash them (by copying)
+        ofaces.each { |f|
+          g.entities.add_face( f.vertices.map{ |i| i.position.project_to_plane( plane ) } )
+        }
+        
+        # Reverse any face's direction if needed
+        faces = g.entities.grep( Sketchup::Face )
+        target = faces[0].normal     
+        faces.each { |f| f.reverse! if !f.normal.samedirection?( target ) }
+        
+        # Allow for undo
+        mod.commit_operation
+        
+        Sketchup.status_text = "Smashing | Done"
+        
+      end
+
+    end # smash_faces   
 
 
     # =========================================
@@ -287,14 +338,17 @@ module AS_Extensions
 
       # Add to the tools menu
       tmenu = UI.menu("Tools").add_submenu( @exttitle )
-      tmenu.add_item("Flatten Selection") { self.flatten_face }
+      tmenu.add_item("Unwrap and Flatten") { self.flatten_faces }
+      tmenu.add_item("Smash (project)") { self.smash_faces }
       tmenu.add_item("Settings") { self.settings }
       tmenu.add_item("Help") { self.show_help }
 
       # Add to the context menu
       UI.add_context_menu_handler do |menu|
         if( self.contains_face )
-          menu.add_item("Flatten Selection") { self.flatten_face }
+          sub = menu.add_submenu( @exttitle )
+          sub.add_item("Unwrap and Flatten") { self.flatten_faces }
+          sub.add_item("Smash (project)") { self.smash_faces }
         end
       end
 

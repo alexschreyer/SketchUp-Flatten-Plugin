@@ -43,9 +43,11 @@ History:        1.0 (2/12/2014):
                 - Fixed loader code
                 - Code cleanup
                 - Fixed problem with SU 2017
-                - New settings: show/hide dialogs, set iterations, target plane
+                - New settings dialog: show/hide dialogs, set iterations, target plane
                 - Better unwrapping algorithm, handles larger items now
-                - End statistics and feedback added
+                - Original geometry is now always preserved (results in grouped copy)
+                - New tool to smash (project) faces to axis plane
+                - End statistics and feedback added to unwrapping tool
 
 Issues:         - The unwrapping algorithm doesn't always work automatically. It basically starts at a
                   random face and tries to line up all faces in a logical pattern. If this doesn't succeed,
@@ -84,7 +86,7 @@ module AS_Extensions
     extension.copyright   = "Copyright 2014-#{Time.now.year} Alexander C. Schreyer"
     extension.creator     = "Alexander C. Schreyer, www.alexschreyer.net"
     extension.version     = @extversion
-    extension.description = "Allows the user to automatically unwrap several selected faces and lay them flat on the ground. This helps in producing cutouts, as CNC-prep, for texturing etc. Can also be used in combination with a manual unfold tool to lay flat shapes on the ground. Usage: Select one or more ungrouped faces and right-click on them to get the 'Flatten faces' menu."
+    extension.description = "Allows the user to automatically unwrap (or smash) several selected faces and lay them flat on the ground. This helps in producing cutouts, as CNC-prep, for texturing etc. Usage: Select one or more ungrouped faces and right-click on them to get the 'Flatten faces' menu."
     
     Sketchup.register_extension( extension , true )
          
