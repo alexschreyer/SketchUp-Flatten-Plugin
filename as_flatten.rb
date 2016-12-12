@@ -15,19 +15,15 @@ Website:        http://www.alexschreyer.net/projects/flatten-faces-plugin/
 
 Name :          Unwrap and Flatten Faces
 
-Version:        2.2
+Version:        2.3
 
-Date :          12/9/2016
+Date :          12/12/2016
 
-Description :   Allows the user to do two things:
-                1)  Lay an arbitrarily-oriented face or collection of coplanar faces flat
-                    on the ground. Use in combination with a manual unfold tool to flatten shapes first.
-                2)  Unwrap non-coplanar faces uaing an automatic (random) algorithm and then
-                    lay the resulting set of faces flat on the ground.
-                This helps in producing cutouts, as CNC-prep, for texturing, etc.
-
-Usage :         Select one or more faces and right-click on them to get the
-                "Flatten faces" menu. Or use the "Unwrap and Flatten" menu items in the Tools menu.
+Description :   Allows the user to automatically unwrap (or smash) several selected 
+                faces and lay them flat on the ground. This helps in producing 
+                laser cutouts, as CNC-prep, for texturing etc. 
+                Usage: Select one or more ungrouped faces and find this tool under the Tools 
+                or the context menu.
 
 History:        1.0 (2/12/2014):
                 - Initial release
@@ -48,13 +44,15 @@ History:        1.0 (2/12/2014):
                 - Original geometry is now always preserved (results in grouped copy)
                 - New tool to smash (project) faces to axis plane
                 - End statistics and feedback added to unwrapping tool
+                2.3 (12/12/2016):
+                - Fixed coplanar face bug
 
 Issues:         - The unwrapping algorithm doesn't always work automatically. It basically starts at a
                   random face and tries to line up all faces in a logical pattern. If this doesn't succeed,
-                  then it iterates 1000 times to get this right. If it still doesn't work, re-try with fewer
+                  then it iterates to get this right. If it still doesn't work, re-try with fewer
                   faces in your selection. Each run is random, so results can vary between tries.
 
-TODO List:
+TODO List:      - Smashing with stretch
 
 =end
 
@@ -73,7 +71,7 @@ module AS_Extensions
 
   module AS_Flatten
   
-    @extversion           = "2.2"
+    @extversion           = "2.3"
     @exttitle             = "Unwrap and Flatten Faces"
     @extname              = "as_flatten"
     
@@ -86,8 +84,8 @@ module AS_Extensions
     extension.copyright   = "Copyright 2014-#{Time.now.year} Alexander C. Schreyer"
     extension.creator     = "Alexander C. Schreyer, www.alexschreyer.net"
     extension.version     = @extversion
-    extension.description = "Allows the user to automatically unwrap (or smash) several selected faces and lay them flat on the ground. This helps in producing cutouts, as CNC-prep, for texturing etc. Usage: Select one or more ungrouped faces and right-click on them to get the 'Flatten faces' menu."
-    
+    extension.description = "Allows the user to automatically unwrap (or smash) several selected faces and lay them flat on the ground. This helps in producing laser cutouts, as CNC-prep, for texturing etc. Usage: Select one or more ungrouped faces and find this tool under the Tools or the context menu."
+
     Sketchup.register_extension( extension , true )
          
   end  # module AS_Flatten

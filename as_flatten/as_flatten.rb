@@ -180,7 +180,8 @@ module AS_Extensions
               onormal = faces[i-1].normal
               rot = tnormal.angle_between( onormal )
               cr = tnormal.cross( onormal )
-              t1 = Geom::Transformation.rotation( cedge[0].start , cr , -rot )
+              # Can't do this if faces are coplanar, so add if
+              t1 = Geom::Transformation.rotation( cedge[0].start , cr , -rot ) if rot != 0.0
               
               # Add the face to the done group             
               g2 = ent.add_group( faces[i-1] )
@@ -188,8 +189,8 @@ module AS_Extensions
               g2.explode
               g3.explode             
               
-              # Then rotate complete group to next face
-              g.transform!( t1 )
+              # Then rotate complete group to next face  
+              g.transform!( t1 ) if rot != 0.0
               
               UI.messagebox( "Face #{i} done\nContinue?" ) if @prompt == "show"
 
@@ -304,7 +305,7 @@ module AS_Extensions
     def self.show_help
     # Show the website as an About dialog
 
-      dlg = UI::WebDialog.new('Unwrap and Flatten Faces - Help', true,'AS_Flatten_Help', 1100, 800, 150, 150, true)
+      dlg = UI::WebDialog.new("#{@exttitle} - Help", true,'AS_Flatten_Help', 1100, 800, 150, 150, true)
       dlg.set_url('http://www.alexschreyer.net/projects/flatten-faces-plugin/')
       dlg.show
 
@@ -319,7 +320,7 @@ module AS_Extensions
       prompts = ["Flatten normal to " , "Iterations " , "Confirmation dialog " , "Step prompts "]
       defaults = [@axis , @iter , @conf , @prompt]
       lists = ["X_AXIS|Y_AXIS|Z_AXIS" , "10|50|100|500|1000|5000|10000" , "show|hide" , "show|hide"]
-      res = UI.inputbox( prompts , defaults , lists , "#{@exttitle} Settings")
+      res = UI.inputbox( prompts , defaults , lists , "#{@exttitle} - Settings")
       if res
         Sketchup.write_default @extname, "axis", @axis = res[0]
         Sketchup.write_default @extname, "iterations", @iter = res[1].to_i
