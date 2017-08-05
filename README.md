@@ -1,7 +1,7 @@
 SketchUp-Flatten-Plugin
 ====================
 
-Copyright 2014-2015, Alexander C. Schreyer
+Copyright 2014-2017, Alexander C. Schreyer
 All rights reserved
 
 THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,

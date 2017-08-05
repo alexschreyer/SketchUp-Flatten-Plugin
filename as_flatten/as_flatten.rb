@@ -1,6 +1,6 @@
 # =========================================
 # Main file for Unwrap and Flatten Faces
-# Copyright 2014-2016, Alexander C. Schreyer
+# Copyright 2014-2017, Alexander C. Schreyer
 # =========================================
 
 
@@ -299,11 +299,19 @@ module AS_Extensions
         g = ent.add_group
         plane = [ ORIGIN , Object.const_get(@axis) ]
         
-        # Now smash them (by copying)
-        ofaces.each { |f|
-          g.entities.add_face( f.vertices.map{ |i| i.position.project_to_plane( plane ) } )
-        }
+        begin  # Catch double vertices error
         
+          # Now smash them (by copying)
+          ofaces.each { |f|
+            g.entities.add_face( f.vertices.map{ |i| i.position.project_to_plane( plane ) } )
+          }
+          
+        rescue Exception => e
+        
+          UI.messagebox("Problems with smashing. Try selecting less overlapping faces. \n\nError: #{e}")
+          
+        end          
+
         # Reverse any face's direction if needed
         faces = g.entities.grep( Sketchup::Face ) 
         faces.each { |f| f.reverse! if !f.normal.samedirection?( Object.const_get(@axis) ) }

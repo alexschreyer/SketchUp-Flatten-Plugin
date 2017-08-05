@@ -1,6 +1,6 @@
 =begin
 
-Copyright 2014-2016, Alexander C. Schreyer
+Copyright 2014-2017, Alexander C. Schreyer
 All rights reserved
 
 THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -15,9 +15,9 @@ Website:        http://www.alexschreyer.net/projects/flatten-faces-plugin/
 
 Name :          Unwrap and Flatten Faces
 
-Version:        2.3
+Version:        2.4
 
-Date :          12/12/2016
+Date :          8/5/2017
 
 Description :   Allows the user to automatically unwrap (or smash) several selected 
                 faces and lay them flat on the ground. This helps in producing 
@@ -46,9 +46,9 @@ History:        1.0 (2/12/2014):
                 - End statistics and feedback added to unwrapping tool
                 2.3 (12/12/2016):
                 - Fixed coplanar face bug
-                2.4 (TBD):
+                2.4 (8/5/2017):
                 - Added colorizing of unwrapped/smashed segments for reference
-                - All confirmation dialogs can now be turned off
+                - All confirmation dialogs can now be turned off (in settings)
                 - Fixed face orientation for smashing
                 - Fixed axis location of flattened shape
 
@@ -76,7 +76,7 @@ module AS_Extensions
 
   module AS_Flatten
   
-    @extversion           = "2.3"
+    @extversion           = "2.4"
     @exttitle             = "Unwrap and Flatten Faces"
     @extname              = "as_flatten"
     
