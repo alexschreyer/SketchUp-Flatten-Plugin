@@ -240,7 +240,7 @@ module AS_Extensions
             msg += "Automatic unwrapping is not possible. Select fewer faces (or increase iterations in settings). " if endnum < startnum
             msg += "Unwrapping yielded overlapping faces. Select fewer faces (unwrap in segments) for a better result. " if endnum > startnum
             msg += "\n\nExplode result and run tool again if faces are not on ground."
-            UI.messagebox(msg) if @conf == "show"
+            UI.messagebox(msg) if @conf == "show" or endnum != startnum
             if endnum == startnum
               Sketchup.status_text = "Unwrapping | Done" 
             else
