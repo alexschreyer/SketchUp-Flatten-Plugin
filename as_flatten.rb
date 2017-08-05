@@ -46,6 +46,11 @@ History:        1.0 (2/12/2014):
                 - End statistics and feedback added to unwrapping tool
                 2.3 (12/12/2016):
                 - Fixed coplanar face bug
+                2.4 (TBD):
+                - Added colorizing of unwrapped/smashed segments for reference
+                - All confirmation dialogs can now be turned off
+                - Fixed face orientation for smashing
+                - Fixed axis location of flattened shape
 
 Issues:         - The unwrapping algorithm doesn't always work automatically. It basically starts at a
                   random face and tries to line up all faces in a logical pattern. If this doesn't succeed,

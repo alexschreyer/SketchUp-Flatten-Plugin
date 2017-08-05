@@ -20,9 +20,17 @@ module AS_Extensions
  
     # Get settings
     @conf = Sketchup.read_default @extname, "confirmation", "show"
+    @color = Sketchup.read_default @extname, "colorize", "no"
     @prompt = Sketchup.read_default @extname, "prompts", "hide"
     @iter = Sketchup.read_default @extname, "iterations", "1000"
     @axis = Sketchup.read_default @extname, "axis", "Z_AXIS"
+    
+    # Define some random colors and an index
+    @c = []
+    50.times {
+      @c << Sketchup::Color.new(rand(255), rand(255), rand(255))
+    }
+    @c_i = 0
 
 
   # =========================================
@@ -47,9 +55,16 @@ module AS_Extensions
       
       UI.messagebox("Now dropping to z=0\nContinue?") if @prompt == "show"
 
-      # Then drop to z=0
-      el = gr.bounds.center.z
-      t2 = Geom::Transformation.translation( [0,0,-el] )
+      # Then drop to zero
+      cen = gr.bounds.center
+      case @axis
+        when "X_AXIS"
+          t2 = Geom::Transformation.translation( [-cen.x,0,0] )
+        when "Y_AXIS"
+          t2 = Geom::Transformation.translation( [0,-cen.y,0] )          
+        else
+          t2 = Geom::Transformation.translation( [0,0,-cen.z] )
+      end
       gr.transform!( t2 )
     
     end  
@@ -91,6 +106,9 @@ module AS_Extensions
         if coplanar  # Just group faces without unwrapping, then lay flat
 
           mod.start_operation("Flatten Faces")
+          
+          # Colorize original faces if desired
+          ofaces.each{ |f| f.material = @c[@c_i] if f.is_a? Sketchup::Face } if @color == "yes"
 
           # Group face(s) and drop
           g = ent.add_group()
@@ -99,6 +117,10 @@ module AS_Extensions
           g2.explode
           g3.explode  
           rotate_drop( g )
+                      
+          # Colorize flattened faces if desired
+          g.entities.each{ |f| f.material = @c[@c_i] if f.is_a? Sketchup::Face } if @color == "yes"
+          @c_i = rand( @c.length )           
 
           # Allow for undo
           mod.commit_operation
@@ -109,6 +131,9 @@ module AS_Extensions
           UI.messagebox("Non-coplanar faces selected. Will try to unwrap first and then flatten them. This doesn't always work automatically. Re-try with fewer faces in your selection if you run into problems. Each run is random, so results can vary between tries.") if @conf == "show"
 
           mod.start_operation("Unwrap and Flatten Faces")
+          
+          # Colorize original faces if desired
+          ofaces.each{ |f| f.material = @c[@c_i] if f.is_a? Sketchup::Face } if @color == "yes"
 
           # A few more variables for this
           faces = Array.new
@@ -185,7 +210,7 @@ module AS_Extensions
               
               # Add the face to the done group             
               g2 = ent.add_group( faces[i-1] )
-              g3 = g.entities.add_instance( g2.definition , g.transformation.invert!*g2.transformation )
+              g3 = g.entities.add_instance( g2.definition , g.transformation.invert!*g2.transformation )              
               g2.explode
               g3.explode             
               
@@ -206,14 +231,21 @@ module AS_Extensions
             # Rotate after unwrapping and drop   
             endnum = g.entities.grep( Sketchup::Face ).length
             rotate_drop( g )
+                            
+            # Colorize flattened faces if desired
+            g.entities.each{ |f| f.material = @c[@c_i] if f.is_a? Sketchup::Face } if @color == "yes"
+            @c_i = rand( @c.length ) 
             
             msg = "#{endnum} out of #{startnum} selected faces unwrapped. "
             msg += "Automatic unwrapping is not possible. Select fewer faces (or increase iterations in settings). " if endnum < startnum
             msg += "Unwrapping yielded overlapping faces. Select fewer faces (unwrap in segments) for a better result. " if endnum > startnum
             msg += "\n\nExplode result and run tool again if faces are not on ground."
-            UI.messagebox(msg)
-
-            Sketchup.status_text = "Unwrapping | Done"
+            UI.messagebox(msg) if @conf == "show"
+            if endnum == startnum
+              Sketchup.status_text = "Unwrapping | Done" 
+            else
+              Sketchup.status_text = "Unwrapping | Done with problems" 
+            end
 
           rescue Exception => e  
             
@@ -259,6 +291,9 @@ module AS_Extensions
         Sketchup.status_text = "Smashing | Working..."
         
         mod.start_operation("Smashing Faces")
+        
+        # Colorize original faces if desired
+        ofaces.each{ |f| f.material = @c[@c_i] if f.is_a? Sketchup::Face } if @color == "yes"
       
         # Group for result and plane
         g = ent.add_group
@@ -270,9 +305,12 @@ module AS_Extensions
         }
         
         # Reverse any face's direction if needed
-        faces = g.entities.grep( Sketchup::Face )
-        target = faces[0].normal     
-        faces.each { |f| f.reverse! if !f.normal.samedirection?( target ) }
+        faces = g.entities.grep( Sketchup::Face ) 
+        faces.each { |f| f.reverse! if !f.normal.samedirection?( Object.const_get(@axis) ) }
+        
+        # Colorize flattened faces if desired
+        g.entities.each{ |f| f.material = @c[@c_i] if f.is_a? Sketchup::Face } if @color == "yes"
+        @c_i = rand( @c.length ) 
         
         # Allow for undo
         mod.commit_operation
@@ -317,15 +355,16 @@ module AS_Extensions
     
     def self.settings
     
-      prompts = ["Flatten normal to " , "Iterations " , "Confirmation dialog " , "Step prompts "]
-      defaults = [@axis , @iter , @conf , @prompt]
-      lists = ["X_AXIS|Y_AXIS|Z_AXIS" , "10|50|100|500|1000|5000|10000" , "show|hide" , "show|hide"]
+      prompts = ["Flatten normal to " , "Colorize ", "Iterations " , "Confirmation dialogs " , "Step prompts "]
+      defaults = [@axis , @color, @iter , @conf , @prompt]
+      lists = ["X_AXIS|Y_AXIS|Z_AXIS" , "yes|no", "10|50|100|500|1000|5000|10000" , "show|hide" , "show|hide"]
       res = UI.inputbox( prompts , defaults , lists , "#{@exttitle} - Settings")
       if res
         Sketchup.write_default @extname, "axis", @axis = res[0]
-        Sketchup.write_default @extname, "iterations", @iter = res[1].to_i
-        Sketchup.write_default @extname, "confirmation", @conf = res[2]  
-        Sketchup.write_default @extname, "prompts", @prompt = res[3]
+        Sketchup.write_default @extname, "colorize", @color = res[1]
+        Sketchup.write_default @extname, "iterations", @iter = res[2].to_i
+        Sketchup.write_default @extname, "confirmation", @conf = res[3]  
+        Sketchup.write_default @extname, "prompts", @prompt = res[4]
       end
       
     end
