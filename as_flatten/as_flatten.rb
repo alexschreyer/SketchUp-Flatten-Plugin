@@ -28,7 +28,7 @@ module AS_Extensions
     # Define some random colors and an index
     @c = []
     50.times {
-      @c << Sketchup::Color.new(rand(255), rand(255), rand(255))
+      @c << Sketchup::Color.new(rand(70..230), rand(70..230), rand(70..230))
     }
     @c_i = 0
 
