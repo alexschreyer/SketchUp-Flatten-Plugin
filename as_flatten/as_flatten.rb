@@ -299,18 +299,14 @@ module AS_Extensions
         g = ent.add_group
         plane = [ ORIGIN , Object.const_get(@axis) ]
         
-        begin  # Catch double vertices error
-        
-          # Now smash them (by copying)
-          ofaces.each { |f|
+        # Now smash them (by copying)
+        ofaces.each { |f|
+          begin  # Catch double vertices error
             g.entities.add_face( f.vertices.map{ |i| i.position.project_to_plane( plane ) } )
-          }
-          
-        rescue Exception => e
-        
-          UI.messagebox("Problems with smashing. Try selecting less overlapping faces. \n\nError: #{e}")
-          
-        end          
+          rescue
+            p "Double vertices ignored"
+          end
+        }      
 
         # Reverse any face's direction if needed
         faces = g.entities.grep( Sketchup::Face ) 

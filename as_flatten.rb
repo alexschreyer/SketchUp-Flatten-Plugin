@@ -48,10 +48,12 @@ History:        1.0 (2/12/2014):
                 - Fixed coplanar face bug
                 2.4 (8/5/2017):
                 - Added colorizing of unwrapped/smashed segments for reference
+                - Toned down colors a bit (no white/black)                
                 - All confirmation dialogs can now be turned off (in settings)
                 - Fixed face orientation for smashing
+                - Fixed vertices bug for smashing
                 - Fixed axis location of flattened shape
-                - Toned down colors a bit (no white/black)
+
 
 Issues:         - The unwrapping algorithm doesn't always work automatically. It basically starts at a
                   random face and tries to line up all faces in a logical pattern. If this doesn't succeed,
