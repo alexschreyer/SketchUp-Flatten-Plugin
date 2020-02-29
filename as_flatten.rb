@@ -1,6 +1,6 @@
 =begin
 
-Copyright 2014-2017, Alexander C. Schreyer
+Copyright 2014-2020, Alexander C. Schreyer
 All rights reserved
 
 THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -11,13 +11,13 @@ License:        GPL (http://www.gnu.org/licenses/gpl.html)
 
 Author :        Alexander Schreyer, www.alexschreyer.net, mail@alexschreyer.net
 
-Website:        http://www.alexschreyer.net/projects/flatten-faces-plugin/
+Website:        https://www.alexschreyer.net/projects/flatten-faces-plugin/
 
 Name :          Unwrap and Flatten Faces
 
-Version:        2.4
+Version:        2.5
 
-Date :          8/5/2017
+Date :          2/29/2020
 
 Description :   Allows the user to automatically unwrap (or smash) several selected 
                 faces and lay them flat on the ground. This helps in producing 
@@ -53,6 +53,9 @@ History:        1.0 (2/12/2014):
                 - Fixed face orientation for smashing
                 - Fixed vertices bug for smashing
                 - Fixed axis location of flattened shape
+                2.5 (2/29/2020)
+                - Improved code for help window
+                - Fixed SU 2020 window problem (class var)
 
 
 Issues:         - The unwrapping algorithm doesn't always work automatically. It basically starts at a
@@ -79,7 +82,7 @@ module AS_Extensions
 
   module AS_Flatten
   
-    @extversion           = "2.4"
+    @extversion           = "2.5"
     @exttitle             = "Unwrap and Flatten Faces"
     @extname              = "as_flatten"
     

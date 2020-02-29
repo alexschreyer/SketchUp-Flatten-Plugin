@@ -342,14 +342,31 @@ module AS_Extensions
 
 
     # =========================================
-
+    
+    
+    def self.show_url( title , url )
+    # Show website either as a WebDialog or HtmlDialog
+    
+      if Sketchup.version.to_f < 17 then   # Use old dialog
+        @dlg = UI::WebDialog.new( title , true ,
+          title.gsub(/\s+/, "_") , 1000 , 600 , 100 , 100 , true);
+        @dlg.navigation_buttons_enabled = false
+        @dlg.set_url( url )
+        @dlg.show      
+      else   #Use new dialog
+        @dlg = UI::HtmlDialog.new( { :dialog_title => title, :width => 1000, :height => 600,
+          :style => UI::HtmlDialog::STYLE_DIALOG, :preferences_key => title.gsub(/\s+/, "_") } )
+        @dlg.set_url( url )
+        @dlg.show
+        @dlg.center
+      end  
+    
+    end  
 
     def self.show_help
     # Show the website as an About dialog
-
-      dlg = UI::WebDialog.new("#{@exttitle} - Help", true,'AS_Flatten_Help', 1100, 800, 150, 150, true)
-      dlg.set_url('http://www.alexschreyer.net/projects/flatten-faces-plugin/')
-      dlg.show
+    
+      show_url( "#{@exttitle} - Help" , 'https://www.alexschreyer.net/projects/flatten-faces-plugin/' )
 
     end # show_help
 
