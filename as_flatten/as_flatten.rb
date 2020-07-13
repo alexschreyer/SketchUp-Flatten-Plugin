@@ -112,6 +112,7 @@ module AS_Extensions
 
           # Group face(s) and drop
           g = ent.add_group()
+          g.transformation = Geom::Transformation.new( e.edges[0].vertices[0].position , e.normal )
           g2 = ent.add_group( ofaces )
           g3 = g.entities.add_instance( g2.definition , g.transformation.invert!*g2.transformation )
           g2.explode
@@ -193,6 +194,7 @@ module AS_Extensions
 
             # Group for all unwrapped faces
             g = ent.add_group
+            g.transformation = Geom::Transformation.new( faces[0].edges[0].vertices[0].position , faces[0].normal )
 
             # Now iterate through the faces
             (1..faces.length-1).each {|i|
