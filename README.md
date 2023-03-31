@@ -1,4 +1,4 @@
-SketchUp-Flatten-Plugin
+Unwrap and Flatten Faces Extension for SketchUp
 ====================
 
 Copyright 2014-2023, Alexander C. Schreyer
