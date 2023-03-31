@@ -10,7 +10,7 @@ WHERE APPLICABLE, THIRD-PARTY MATERIALS AND THIRD-PARTY PLATFORMS ARE PROVIDED '
 
 License:        GPL (https://www.gnu.org/licenses/gpl-3.0.html)
 
-Author :        Alexander Schreyer, www.alexschreyer.net, mail@alexschreyer.net
+Author :        Alexander Schreyer, alexschreyer.net
 
 Website:        http://www.alexschreyer.net/projects/flatten-faces-plugin/
 
