@@ -17,6 +17,6 @@ Website:        http://www.alexschreyer.net/projects/flatten-faces-plugin/
 Description :   Allows the user to do two things:
                 1)  Lay an arbitrarily-oriented face or collection of coplanar faces flat
                     on the ground. Use in combination with a manual unfold tool to flatten shapes first.
-                2)  Unwrap non-coplanar faces uaing an automatic (random) algorithm and then
+                2)  Unwrap non-coplanar faces using an automatic (random) algorithm and then
                     lay the resulting set of faces flat on the ground.
                 This helps in producing cutouts, as CNC-prep, for texturing, etc.
